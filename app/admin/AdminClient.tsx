@@ -38,6 +38,30 @@ export default function AdminClient({
     }
   }
 
+  function exportCsv() {
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const header = ["Name", "1st pick", "2nd pick", "3rd pick", "Submitted at"];
+    const rows = votes.map((v) => {
+      const picks = [0, 1, 2].map((i) => optionsById.get(v.picksParsed[i] ?? "")?.name ?? "");
+      return [
+        v.respondent_name ?? "",
+        ...picks,
+        new Date(v.created_at * 1000).toISOString(),
+      ].map(escape).join(",");
+    });
+    const csv = [header.map(escape).join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `azuki-poll-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <>
       <div style={{ display: "flex", gap: 16, marginBottom: 24, alignItems: "baseline" }}>
@@ -47,6 +71,15 @@ export default function AdminClient({
         <p className="subtitle" style={{ margin: 0 }}>
           {votes.length} {votes.length === 1 ? "vote" : "votes"}
         </p>
+        <button
+          type="button"
+          className="btn-secondary"
+          style={{ marginLeft: "auto" }}
+          disabled={votes.length === 0}
+          onClick={exportCsv}
+        >
+          Export CSV
+        </button>
       </div>
 
       <div className="admin-card" style={{ marginBottom: 24 }}>

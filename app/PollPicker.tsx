@@ -79,8 +79,7 @@ export default function PollPicker({ options }: Props) {
       <div className="intro">
         <h1 className="question">Pick your top 3 favorites.</h1>
         <p className="subtitle">
-          Tap to rank — first tap is your #1, then #2, then #3. Tap again to
-          remove. We&rsquo;ll bake the winners next week.
+          Tap to rank. First tap is #1, then #2, then #3. Tap again to remove.
         </p>
       </div>
 
@@ -116,22 +115,6 @@ export default function PollPicker({ options }: Props) {
         })}
       </div>
 
-      <div className="name-field">
-        <label htmlFor="name-input" className="name-label">
-          Your name <span className="name-optional">(optional)</span>
-        </label>
-        <input
-          id="name-input"
-          type="text"
-          className="name-input"
-          placeholder="So we know who voted"
-          autoComplete="given-name"
-          maxLength={60}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-
       {error && (
         <p style={{ color: "var(--accent)", marginTop: 16, fontSize: 14 }}>
           {error}
@@ -140,7 +123,6 @@ export default function PollPicker({ options }: Props) {
 
       <div className="tray-wrap">
         <div className="tray">
-          <div className="tray-label">Your picks</div>
           <div className="tray-slots">
             {[1, 2, 3].map((rank) => {
               const id = picks[rank - 1];
@@ -188,23 +170,35 @@ export default function PollPicker({ options }: Props) {
               );
             })}
           </div>
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={picks.length === 0 || submitting}
-            onClick={submit}
-          >
-            {submitting ? "Submitting…" : "Submit"}
-            <svg viewBox="0 0 16 16" fill="none">
-              <path
-                d="M3 8h10m0 0L9 4m4 4l-4 4"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          <div className="tray-actions">
+            <input
+              id="name-input"
+              type="text"
+              className="name-input"
+              placeholder="Your name"
+              autoComplete="given-name"
+              maxLength={60}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={picks.length === 0 || submitting}
+              onClick={submit}
+            >
+              {submitting ? "Submitting…" : "Submit"}
+              <svg viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M3 8h10m0 0L9 4m4 4l-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
