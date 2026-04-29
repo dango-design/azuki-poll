@@ -4,7 +4,13 @@ const COOKIE_NAME = "admin";
 const ONE_DAY = 60 * 60 * 24;
 
 export function adminPassword() {
-  return process.env.ADMIN_PASSWORD ?? "azuki";
+  const p = process.env.ADMIN_PASSWORD;
+  if (!p) {
+    throw new Error(
+      "ADMIN_PASSWORD env var is required (set it in .env.local locally and in Vercel project settings).",
+    );
+  }
+  return p;
 }
 
 export async function isAdmin() {
