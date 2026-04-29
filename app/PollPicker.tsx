@@ -212,7 +212,7 @@ function ThanksScreen({
   name: string | null;
   picks: PollOption[];
 }) {
-  const heading = name && name.length > 0 ? `Thanks, ${name}.` : "Thanks for voting.";
+  const heading = name && name.length > 0 ? `Thanks, ${name}.` : "Thanks.";
   return (
     <div className="poll-page">
       <div className="poll-header">
@@ -235,7 +235,7 @@ function ThanksScreen({
           </svg>
         </div>
         <h2>{heading}</h2>
-        <p>Your picks have been recorded. We&rsquo;ll let you know what wins.</p>
+        <p>We hope you enjoyed Azuki Baby Pop Up. Can&rsquo;t wait until we see you again!</p>
         <div className="thanks-picks">
           {picks.map((opt, i) => (
             <div key={opt.id} className="thanks-pick">
