@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PollOption } from "@/lib/options";
 
 const SUFFIX: Record<number, string> = { 1: "st", 2: "nd", 3: "rd" };
@@ -13,13 +13,37 @@ export default function PollPicker({ options }: Props) {
   const [picks, setPicks] = useState<string[]>([]);
   const [name, setName] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const optionsById = useMemo(
     () => new Map(options.map((o) => [o.id, o])),
     [options],
   );
+
+  // Push the sticky tray above the on-screen keyboard. On mobile, focusing
+  // an input shrinks the visual viewport without resizing the layout
+  // viewport, so a `position: fixed; bottom: 0` element ends up hidden
+  // behind the keyboard. Track the gap as a CSS variable.
+  useEffect(() => {
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    if (!vv) return;
+    function update() {
+      if (!vv) return;
+      const inset = Math.max(window.innerHeight - vv.height - vv.offsetTop, 0);
+      document.documentElement.style.setProperty(
+        "--keyboard-inset",
+        `${inset}px`,
+      );
+    }
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    update();
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
 
   function toggle(id: string) {
     setPicks((prev) => {
@@ -48,7 +72,7 @@ export default function PollPicker({ options }: Props) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Submit failed");
       }
-      setSubmittedName(name.trim() || null);
+      setSubmitted(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submit failed");
     } finally {
@@ -56,10 +80,10 @@ export default function PollPicker({ options }: Props) {
     }
   }
 
-  if (submittedName !== null) {
+  if (submitted) {
     return (
       <ThanksScreen
-        name={submittedName}
+        name={name.trim() || null}
         picks={picks.map((id) => optionsById.get(id)!).filter(Boolean)}
       />
     );
