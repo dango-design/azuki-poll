@@ -15,7 +15,7 @@ export async function DELETE(
   }
   await dbReady;
   const result = await db.execute({
-    sql: "DELETE FROM responses WHERE id = ?",
+    sql: "DELETE FROM votes WHERE id = ?",
     args: [numId],
   });
   return Response.json({ ok: true, deleted: Number(result.rowsAffected) });

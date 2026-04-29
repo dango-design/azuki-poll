@@ -2,24 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { Recipient, Response } from "@/lib/db";
+import type { Vote } from "@/lib/db";
 import type { PollOption } from "@/lib/options";
 
-type RowResponse = Response & { picksParsed: string[] };
-
-type Row = {
-  recipient: Recipient;
-  response: RowResponse | null;
-};
+type VoteRow = Vote & { picksParsed: string[] };
 
 type RankedOption = PollOption & { score: number };
 
 export default function AdminClient({
-  rows,
+  votes,
   ranked,
   options,
 }: {
-  rows: Row[];
+  votes: VoteRow[];
   ranked: RankedOption[];
   options: PollOption[];
 }) {
@@ -28,11 +23,11 @@ export default function AdminClient({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const optionsById = new Map(options.map((o) => [o.id, o]));
 
-  async function deleteResponse(id: number) {
-    if (!confirm("Delete this response?")) return;
+  async function deleteVote(id: number) {
+    if (!confirm("Delete this vote?")) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/responses/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/votes/${id}`, { method: "DELETE" });
       if (!res.ok) {
         alert("Failed to delete");
         return;
@@ -43,8 +38,6 @@ export default function AdminClient({
     }
   }
 
-  const responseCount = rows.filter((r) => r.response).length;
-
   return (
     <>
       <div style={{ display: "flex", gap: 16, marginBottom: 24, alignItems: "baseline" }}>
@@ -52,7 +45,7 @@ export default function AdminClient({
           Results
         </h1>
         <p className="subtitle" style={{ margin: 0 }}>
-          {responseCount} of {rows.length} responded
+          {votes.length} {votes.length === 1 ? "vote" : "votes"}
         </p>
       </div>
 
@@ -106,7 +99,6 @@ export default function AdminClient({
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Recipient</th>
               <th>Voted as</th>
               <th>Picks</th>
               <th>When</th>
@@ -114,30 +106,23 @@ export default function AdminClient({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ recipient, response }) => (
-              <tr key={recipient.id}>
-                <td>
-                  <div style={{ fontWeight: 500 }}>
-                    {recipient.name ?? <span style={{ color: "var(--muted)" }}>(no name)</span>}
-                  </div>
-                  {recipient.email && (
-                    <div style={{ fontSize: 12, color: "var(--muted)" }}>{recipient.email}</div>
-                  )}
-                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
-                    /p/{recipient.token}
-                  </div>
+            {votes.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ color: "var(--muted)", textAlign: "center", padding: "24px 0" }}>
+                  No votes yet.
                 </td>
-                <td>
-                  {response ? (
-                    response.respondent_name ?? <span style={{ color: "var(--muted)" }}>—</span>
-                  ) : (
-                    <span style={{ color: "var(--muted)" }}>—</span>
-                  )}
-                </td>
-                <td>
-                  {response ? (
+              </tr>
+            ) : (
+              votes.map((vote) => (
+                <tr key={vote.id}>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>
+                      {vote.respondent_name ?? <span style={{ color: "var(--muted)" }}>(no name)</span>}
+                    </div>
+                  </td>
+                  <td>
                     <div>
-                      {response.picksParsed.map((id, i) => {
+                      {vote.picksParsed.map((id, i) => {
                         const opt = optionsById.get(id);
                         if (!opt) return null;
                         return (
@@ -152,27 +137,23 @@ export default function AdminClient({
                         );
                       })}
                     </div>
-                  ) : (
-                    <span style={{ color: "var(--muted)" }}>No response</span>
-                  )}
-                </td>
-                <td style={{ color: "var(--muted)", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
-                  {response ? new Date(response.created_at * 1000).toLocaleString() : "—"}
-                </td>
-                <td>
-                  {response && (
+                  </td>
+                  <td style={{ color: "var(--muted)", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+                    {new Date(vote.created_at * 1000).toLocaleString()}
+                  </td>
+                  <td>
                     <button
                       type="button"
                       className="btn-danger"
-                      disabled={deletingId === response.id || pending}
-                      onClick={() => deleteResponse(response.id)}
+                      disabled={deletingId === vote.id || pending}
+                      onClick={() => deleteVote(vote.id)}
                     >
-                      {deletingId === response.id ? "Deleting…" : "Delete"}
+                      {deletingId === vote.id ? "Deleting…" : "Delete"}
                     </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

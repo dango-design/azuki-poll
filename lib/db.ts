@@ -26,16 +26,8 @@ export const db: Client = globalForDb.__db ?? buildClient();
 async function migrate(): Promise<void> {
   await db.batch(
     [
-      `CREATE TABLE IF NOT EXISTS recipients (
+      `CREATE TABLE IF NOT EXISTS votes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        token TEXT NOT NULL UNIQUE,
-        name TEXT,
-        email TEXT,
-        created_at INTEGER NOT NULL DEFAULT (unixepoch())
-      )`,
-      `CREATE TABLE IF NOT EXISTS responses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        token TEXT NOT NULL UNIQUE REFERENCES recipients(token) ON DELETE CASCADE,
         respondent_name TEXT,
         picks TEXT NOT NULL,
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -53,17 +45,8 @@ if (process.env.NODE_ENV !== "production") {
   globalForDb.__dbReady = dbReady;
 }
 
-export type Recipient = {
+export type Vote = {
   id: number;
-  token: string;
-  name: string | null;
-  email: string | null;
-  created_at: number;
-};
-
-export type Response = {
-  id: number;
-  token: string;
   respondent_name: string | null;
   picks: string;
   created_at: number;

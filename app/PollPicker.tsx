@@ -6,26 +6,14 @@ import type { PollOption } from "@/lib/options";
 const SUFFIX: Record<number, string> = { 1: "st", 2: "nd", 3: "rd" };
 
 type Props = {
-  token: string;
-  recipientName: string | null;
   options: PollOption[];
-  existing: { respondentName: string | null; picks: string[] } | null;
 };
 
-export default function PollPicker({
-  token,
-  recipientName,
-  options,
-  existing,
-}: Props) {
-  const [picks, setPicks] = useState<string[]>(existing?.picks ?? []);
-  const [name, setName] = useState<string>(
-    existing?.respondentName ?? recipientName ?? "",
-  );
+export default function PollPicker({ options }: Props) {
+  const [picks, setPicks] = useState<string[]>([]);
+  const [name, setName] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-  const [submittedName, setSubmittedName] = useState<string | null>(
-    existing ? existing.respondentName ?? recipientName ?? "" : null,
-  );
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const optionsById = useMemo(
@@ -54,7 +42,7 @@ export default function PollPicker({
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, picks, name: name.trim() || null }),
+        body: JSON.stringify({ picks, name: name.trim() || null }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
