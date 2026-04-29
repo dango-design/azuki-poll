@@ -110,6 +110,8 @@ body {
   color: inherit;
   box-shadow: var(--shadow-sm);
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .card:hover {
   transform: translateY(-2px);
