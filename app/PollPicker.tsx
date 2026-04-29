@@ -132,7 +132,6 @@ export default function PollPicker({ options }: Props) {
               </div>
               <div className="card-body">
                 <h3 className="card-title">{opt.name}</h3>
-                <p className="card-meta">{opt.meta}</p>
               </div>
             </button>
           );
